@@ -1,3 +1,4 @@
+
 name: Validate Detection Rules
 
 on: [push, pull_request]
@@ -5,32 +6,83 @@ on: [push, pull_request]
 jobs:
   sigma-lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install sigma-cli
-        run: pip install sigma-cli
+        run: python -m pip install sigma-cli
 
-      - name: Validate Sigma syntax
+      - name: Validate Sigma rules
+        shell: bash
         run: |
-          shopt -s globstar
-          for f in detections/sigma/**/*.yml; do
+          set -uo pipefail
+          shopt -s globstar nullglob
+
+          files=(detections/sigma/**/*.yml)
+          if (( ${#files[@]} == 0 )); then
+            echo "No Sigma YAML rules found."
+            exit 1
+          fi
+
+          failed=0
+
+          for f in "${files[@]}"; do
             echo "Checking $f"
-            sigma check "$f" || exit 1
+            attempt=1
+
+            until sigma check "$f"; do
+              if (( attempt >= 3 )); then
+                echo "::error file=$f::Validation failed after 3 attempts"
+                failed=1
+                break
+              fi
+
+              echo "Attempt $attempt failed; retrying in 5 seconds..."
+              sleep 5
+              ((attempt += 1))
+            done
           done
+
+          if (( failed != 0 )); then
+            echo "One or more Sigma rules failed validation."
+            exit 1
+          fi
+
+          echo "All Sigma rules passed validation."
 
       - name: Install YARA
-        run: sudo apt-get update && sudo apt-get install -y yara
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yara
 
       - name: Lint YARA rules
+        shell: bash
         run: |
-          shopt -s globstar
-          for f in detections/yara/*.yar; do
+          set -euo pipefail
+          shopt -s nullglob
+
+          files=(detections/yara/*.yar)
+          if (( ${#files[@]} == 0 )); then
+            echo "No YARA rules found."
+            exit 1
+          fi
+
+          for f in "${files[@]}"; do
             echo "Checking $f"
-            yara "$f" /dev/null || exit 1
+            compiled="$(mktemp)"
+            if ! yarac "$f" "$compiled"; then
+              rm -f "$compiled"
+              echo "::error file=$f::Invalid YARA rule"
+              exit 1
+            fi
+            rm -f "$compiled"
           done
+
+          echo "All YARA rules compiled successfully."
