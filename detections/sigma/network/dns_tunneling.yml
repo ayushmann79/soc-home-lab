@@ -1,0 +1,16 @@
+title: Possible DNS Tunneling via Long Query Names
+id: 3f1a1b2c-0007-4e2a-9c1a-000000000007
+status: experimental
+logsource:
+  category: dns
+  product: zeek
+detection:
+  selection:
+    query|re: '^.{50,}$'
+  condition: selection
+falsepositives:
+  - CDN/cloud provider long hostnames
+level: medium
+tags:
+  - attack.command_and_control
+  - attack.t1071.004

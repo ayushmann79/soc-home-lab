@@ -1,0 +1,35 @@
+{
+  "name": "SOC Home Lab Detection Coverage",
+  "versions": {
+    "attack": "15",
+    "navigator": "5.1.0",
+    "layer": "4.5"
+  },
+  "domain": "enterprise-attack",
+  "description": "Detection coverage for the SOC Home Lab portfolio project",
+  "techniques": [
+    { "techniqueID": "T1059.001", "score": 1, "comment": "Sigma-0001 / Wazuh-100011" },
+    { "techniqueID": "T1027", "score": 1, "comment": "Sigma-0001 / Wazuh-100011" },
+    { "techniqueID": "T1053.005", "score": 1, "comment": "Sigma-0002 / Wazuh-100012" },
+    { "techniqueID": "T1003.001", "score": 1, "comment": "Sigma-0003 / Wazuh-100010" },
+    { "techniqueID": "T1543.003", "score": 1, "comment": "Sigma-0004 / Wazuh-100013" },
+    { "techniqueID": "T1548.003", "score": 1, "comment": "Sigma-0005 / Wazuh-100014" },
+    { "techniqueID": "T1059.004", "score": 1, "comment": "Sigma-0006 / Wazuh-100015" },
+    { "techniqueID": "T1071.004", "score": 1, "comment": "Sigma-0007 / Wazuh-100016" },
+    { "techniqueID": "T1071.001", "score": 1, "comment": "Hunt-001 (threat hunting)" },
+    { "techniqueID": "T1218", "score": 1, "comment": "Hunt-002 (threat hunting)" },
+    { "techniqueID": "T1204.002", "score": 1, "comment": "Hunt-003 (threat hunting)" },
+    { "techniqueID": "T1136.001", "score": 1, "comment": "Hunt-004 (threat hunting)" },
+    { "techniqueID": "T1053.003", "score": 1, "comment": "Hunt-005 (threat hunting)" },
+    { "techniqueID": "T1550.002", "score": 0, "comment": "GAP - no automated detection, found in Purple Team Exercise 01" }
+  ],
+  "gradient": {
+    "colors": ["#ff6666", "#66ff66"],
+    "minValue": 0,
+    "maxValue": 1
+  },
+  "legendItems": [
+    { "label": "Detected", "color": "#66ff66" },
+    { "label": "Gap", "color": "#ff6666" }
+  ]
+}

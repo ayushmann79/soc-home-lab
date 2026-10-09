@@ -1,0 +1,18 @@
+title: Sudo Privilege Escalation via Shell Spawn
+id: 3f1a1b2c-0005-4e2a-9c1a-000000000005
+status: experimental
+logsource:
+  product: linux
+  service: auditd
+detection:
+  selection:
+    type: 'EXECVE'
+    a0: 'sudo'
+    a1|in: ['bash', 'sh', '/bin/bash', '/bin/sh']
+  condition: selection
+falsepositives:
+  - Legitimate admin usage
+level: medium
+tags:
+  - attack.privilege_escalation
+  - attack.t1548.003

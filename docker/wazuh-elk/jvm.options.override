@@ -1,0 +1,4 @@
+# Appended/edited in /etc/wazuh-indexer/jvm.options
+# Tuned down for an 8GB host - indexer given 1GB heap
+-Xms1g
+-Xmx1g

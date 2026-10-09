@@ -1,0 +1,25 @@
+<!-- Snippets to add into /var/ossec/etc/ossec.conf on each Linux agent -->
+
+<!-- On the network-sensor VM (150): ingest Suricata + Zeek JSON logs -->
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/suricata/eve.json</location>
+</localfile>
+<localfile>
+  <log_format>json</log_format>
+  <location>/opt/zeek/logs/current/conn.log</location>
+</localfile>
+<localfile>
+  <log_format>json</log_format>
+  <location>/opt/zeek/logs/current/dns.log</location>
+</localfile>
+<localfile>
+  <log_format>json</log_format>
+  <location>/opt/zeek/logs/current/http.log</location>
+</localfile>
+
+<!-- On the Ubuntu endpoint (130): auditd events, native Wazuh integration -->
+<localfile>
+  <log_format>audit</log_format>
+  <location>/var/log/audit/audit.log</location>
+</localfile>

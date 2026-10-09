@@ -1,0 +1,33 @@
+# Secrets - never commit
+*.env
+.env
+secrets/
+**/credentials.txt
+**/*api_key*
+**/*password*
+
+# Wazuh / TheHive / Cortex / MISP generated certs & data
+docker/**/data/
+docker/**/certs/
+*.pem
+*.key
+
+# Terraform state (if used)
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+
+# Logs captured during testing
+*.log
+logs/
+
+# Large ISO/VM images
+*.iso
+*.qcow2
+*.ova

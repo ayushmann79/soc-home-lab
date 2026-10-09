@@ -1,0 +1,36 @@
+name: Validate Detection Rules
+
+on: [push, pull_request]
+
+jobs:
+  sigma-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install sigma-cli
+        run: pip install sigma-cli
+
+      - name: Validate Sigma syntax
+        run: |
+          shopt -s globstar
+          for f in detections/sigma/**/*.yml; do
+            echo "Checking $f"
+            sigma check "$f" || exit 1
+          done
+
+      - name: Install YARA
+        run: sudo apt-get update && sudo apt-get install -y yara
+
+      - name: Lint YARA rules
+        run: |
+          shopt -s globstar
+          for f in detections/yara/*.yar; do
+            echo "Checking $f"
+            yara "$f" /dev/null || exit 1
+          done

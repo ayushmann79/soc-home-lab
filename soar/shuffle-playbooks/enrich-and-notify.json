@@ -1,0 +1,31 @@
+{
+  "name": "Enrich and Notify on Wazuh Critical Alert",
+  "description": "Triggered on TheHive case creation. Extracts the source IP observable, runs it through Cortex's AbuseIPDB analyzer, tags the case if malicious, and sends a notification.",
+  "trigger": {
+    "type": "webhook",
+    "source": "TheHive case creation event"
+  },
+  "actions": [
+    {
+      "step": 1,
+      "name": "Extract observable",
+      "description": "Extract the source IP observable from the newly created TheHive case"
+    },
+    {
+      "step": 2,
+      "name": "Cortex AbuseIPDB lookup",
+      "description": "Call Cortex's AbuseIPDB analyzer via Cortex's REST API against the extracted IP"
+    },
+    {
+      "step": 3,
+      "name": "Conditional tag",
+      "description": "If the AbuseIPDB reputation score exceeds the configured threshold, add tag 'confirmed-malicious' to the TheHive case"
+    },
+    {
+      "step": 4,
+      "name": "Notify",
+      "description": "Send a notification (Discord/Slack webhook, or a local log write as the simplest option) summarizing the case and enrichment result"
+    }
+  ],
+  "notes": "First working end-to-end SOAR automation in the lab. Export this from the actual Shuffle canvas once built, replacing this scaffold with the real exported JSON for authenticity."
+}

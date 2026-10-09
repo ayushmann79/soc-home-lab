@@ -1,0 +1,45 @@
+<!--
+  SOC Home Lab Sysmon configuration.
+  Base: SwiftOnSecurity/sysmon-config (community baseline) - extended here
+  with lab-specific event filtering aligned to the Sigma rules in
+  detections/sigma/windows/. Replace/expand with the full upstream ruleset
+  before production use; this is a trimmed set covering the lab's tested
+  detections (encoded PowerShell, LSASS access, scheduled tasks, service
+  creation).
+-->
+<Sysmon schemaversion="4.90">
+  <EventFiltering>
+
+    <!-- Event ID 1: Process creation -->
+    <ProcessCreate onmatch="include">
+      <Image condition="end with">powershell.exe</Image>
+      <Image condition="end with">schtasks.exe</Image>
+      <Image condition="end with">sc.exe</Image>
+      <Image condition="end with">certutil.exe</Image>
+      <Image condition="end with">mshta.exe</Image>
+      <Image condition="end with">rundll32.exe</Image>
+      <Image condition="end with">cmd.exe</Image>
+      <ParentImage condition="end with">winword.exe</ParentImage>
+      <ParentImage condition="end with">excel.exe</ParentImage>
+      <ParentImage condition="end with">outlook.exe</ParentImage>
+    </ProcessCreate>
+
+    <!-- Event ID 10: Process access (needed for LSASS/credential-dumping detection) -->
+    <ProcessAccess onmatch="include">
+      <TargetImage condition="end with">lsass.exe</TargetImage>
+    </ProcessAccess>
+
+    <!-- Event ID 11: File create (drop detection for YARA/FIM follow-up) -->
+    <FileCreate onmatch="include">
+      <TargetFilename condition="end with">.ps1</TargetFilename>
+      <TargetFilename condition="end with">.exe</TargetFilename>
+      <TargetFilename condition="end with">.dll</TargetFilename>
+    </FileCreate>
+
+    <!-- Event ID 13: Registry value set (persistence detection) -->
+    <RegistryEvent onmatch="include">
+      <TargetObject condition="contains">\CurrentVersion\Run</TargetObject>
+    </RegistryEvent>
+
+  </EventFiltering>
+</Sysmon>

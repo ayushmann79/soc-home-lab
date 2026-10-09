@@ -1,0 +1,17 @@
+title: Scheduled Task Created via schtasks.exe
+id: 3f1a1b2c-0002-4e2a-9c1a-000000000002
+status: experimental
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\schtasks.exe'
+    CommandLine|contains: '/create'
+  condition: selection
+falsepositives:
+  - Legitimate software installers creating scheduled tasks
+level: medium
+tags:
+  - attack.persistence
+  - attack.t1053.005

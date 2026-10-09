@@ -1,0 +1,90 @@
+version: '3.7'
+
+# Consolidated SOAR stack: TheHive + Cortex + MISP + Shuffle
+# Runs on VM 121 (soc-tools, 10.10.20.11, 3GB RAM budget - Mode C)
+#
+# Given the RAM budget, run TheHive + Cortex + their shared Elasticsearch
+# persistently during Mode C sessions. Bring up MISP and Shuffle individually
+# when actively building/testing rather than assuming all six containers run
+# simultaneously - see docs/phase-notes/phase8-soar.md for the resource notes.
+#
+# Secrets (MYSQL_ROOT_PASSWORD, API keys, etc.) belong in a gitignored .env
+# file, referenced here rather than hardcoded - see .env.example.
+
+services:
+  cassandra:
+    image: cassandra:4.1
+    container_name: thehive-cassandra
+    environment:
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=64M
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+
+  elasticsearch-thehive:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    volumes:
+      - thehive-es-data:/usr/share/elasticsearch/data
+
+  thehive:
+    image: strangebee/thehive:5.2
+    depends_on:
+      - cassandra
+      - elasticsearch-thehive
+    ports:
+      - "9000:9000"
+    environment:
+      - JVM_OPTS=-Xms256m -Xmx512m
+    volumes:
+      - thehive-data:/opt/thp/thehive/files
+
+  cortex:
+    image: thehiveproject/cortex:3.1.7
+    depends_on:
+      - elasticsearch-thehive
+    ports:
+      - "9001:9001"
+    environment:
+      - JVM_OPTS=-Xms256m -Xmx384m
+
+  misp-db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:?set in .env}
+      - MYSQL_DATABASE=misp
+    volumes:
+      - misp-db-data:/var/lib/mysql
+
+  misp:
+    image: coolacid/misp-docker:core-latest
+    depends_on:
+      - misp-db
+    ports:
+      - "8443:443"
+    environment:
+      - MYSQL_HOST=misp-db
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:?set in .env}
+
+  shuffle-frontend:
+    image: ghcr.io/shuffle/shuffle-frontend:latest
+    ports:
+      - "3443:3443"
+    depends_on:
+      - shuffle-backend
+
+  shuffle-backend:
+    image: ghcr.io/shuffle/shuffle-backend:latest
+    environment:
+      - SHUFFLE_APP_HOTLOAD_LOCATION=./shuffle-apps
+    volumes:
+      - shuffle-apps:/shuffle-apps
+
+volumes:
+  cassandra-data:
+  thehive-es-data:
+  thehive-data:
+  misp-db-data:
+  shuffle-apps:

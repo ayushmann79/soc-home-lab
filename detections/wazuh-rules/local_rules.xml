@@ -1,0 +1,89 @@
+<!--
+  Custom Wazuh rules ported from the Sigma rules in detections/sigma/.
+  Deploy to /var/ossec/etc/rules/local_rules.xml on the Wazuh manager.
+  Always validate with `/var/ossec/bin/wazuh-logtest` before restarting.
+-->
+
+<group name="credential_access,mitre,">
+  <rule id="100010" level="15">
+    <if_group>sysmon_event10</if_group>
+    <field name="win.eventdata.targetImage" type="pcre2">(?i)lsass\.exe$</field>
+    <field name="win.eventdata.grantedAccess" type="pcre2">0x1010|0x1410|0x1438</field>
+    <description>Potential credential dumping - LSASS memory access</description>
+    <mitre>
+      <id>T1003.001</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="execution,defense_evasion,mitre,">
+  <rule id="100011" level="12">
+    <if_group>sysmon_event1</if_group>
+    <field name="win.eventdata.image" type="pcre2">(?i)powershell\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(-EncodedCommand|-enc |-e )</field>
+    <description>Suspicious encoded PowerShell command execution</description>
+    <mitre>
+      <id>T1059.001</id>
+      <id>T1027</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="persistence,mitre,">
+  <rule id="100012" level="8">
+    <if_group>sysmon_event1</if_group>
+    <field name="win.eventdata.image" type="pcre2">(?i)schtasks\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)/create</field>
+    <description>Scheduled task created via schtasks.exe</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <rule id="100013" level="8">
+    <if_group>sysmon_event1</if_group>
+    <field name="win.eventdata.image" type="pcre2">(?i)sc\.exe$</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)create</field>
+    <description>New Windows service created via sc.exe</description>
+    <mitre>
+      <id>T1543.003</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="privilege_escalation,mitre,linux,">
+  <rule id="100014" level="8">
+    <decoded_as>auditd</decoded_as>
+    <field name="audit.type">EXECVE</field>
+    <field name="audit.execve.a0">sudo</field>
+    <field name="audit.execve.a1" type="pcre2">^(bash|sh|/bin/bash|/bin/sh)$</field>
+    <description>Sudo privilege escalation via shell spawn</description>
+    <mitre>
+      <id>T1548.003</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="command_and_control,mitre,linux,">
+  <rule id="100015" level="15">
+    <decoded_as>auditd</decoded_as>
+    <field name="audit.type">EXECVE</field>
+    <field name="audit.execve.a0" type="pcre2">(?i)bash</field>
+    <field name="audit.command" type="pcre2">/dev/tcp/</field>
+    <description>Possible bash reverse shell via /dev/tcp</description>
+    <mitre>
+      <id>T1059.004</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="command_and_control,mitre,network,">
+  <rule id="100016" level="8">
+    <decoded_as>json</decoded_as>
+    <field name="zeek.dns.query" type="pcre2">^.{50,}$</field>
+    <description>Possible DNS tunneling - long query name observed</description>
+    <mitre>
+      <id>T1071.004</id>
+    </mitre>
+  </rule>
+</group>

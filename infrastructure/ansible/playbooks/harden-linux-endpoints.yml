@@ -1,0 +1,43 @@
+---
+# Ansible equivalent of scripts/bash/harden-ubuntu.sh, for repeatable
+# provisioning across Linux endpoints as the lab grows.
+- name: Harden Linux endpoints
+  hosts: always_on
+  become: true
+  tasks:
+    - name: Install baseline security packages
+      apt:
+        name:
+          - auditd
+          - audispd-plugins
+          - ufw
+          - fail2ban
+        state: present
+        update_cache: true
+
+    - name: Enable auditd
+      systemd:
+        name: auditd
+        enabled: true
+        state: started
+
+    - name: Set UFW default deny incoming
+      ufw:
+        direction: incoming
+        policy: deny
+
+    - name: Allow SSH from management VLAN only
+      ufw:
+        rule: allow
+        port: '22'
+        from_ip: 10.10.10.0/24
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+
+    - name: Enable fail2ban
+      systemd:
+        name: fail2ban
+        enabled: true
+        state: started

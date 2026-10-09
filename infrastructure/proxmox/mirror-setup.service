@@ -1,0 +1,13 @@
+[Unit]
+Description=Reapply traffic mirror rule for Zeek/Suricata sensor
+After=pve-guests.service
+Requires=pve-guests.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 45
+ExecStart=/home/claude/soc-home-lab/scripts/bash/mirror-setup.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

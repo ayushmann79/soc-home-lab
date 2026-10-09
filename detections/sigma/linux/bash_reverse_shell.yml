@@ -1,0 +1,17 @@
+title: Bash Reverse Shell via /dev/tcp
+id: 3f1a1b2c-0006-4e2a-9c1a-000000000006
+status: experimental
+logsource:
+  product: linux
+  service: auditd
+detection:
+  selection:
+    type: 'EXECVE'
+    a0|contains: 'bash'
+  keywords:
+    - '/dev/tcp/'
+  condition: selection and keywords
+level: critical
+tags:
+  - attack.command_and_control
+  - attack.t1059.004
