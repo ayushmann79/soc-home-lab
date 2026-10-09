@@ -14,5 +14,4 @@ detection:
   condition: selection and keywords
 level: critical
 tags:
-  - attack.command_and_control
   - attack.t1059.004
