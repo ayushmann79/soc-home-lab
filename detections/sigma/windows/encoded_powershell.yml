@@ -1,3 +1,4 @@
+
 title: Suspicious Encoded PowerShell Command
 id: 3f1a1b2c-0001-4e2a-9c1a-000000000001
 status: experimental
@@ -17,7 +18,5 @@ falsepositives:
   - Legitimate admin scripts using encoded commands (rare)
 level: high
 tags:
-  - attack.execution
   - attack.t1059.001
-  - attack.defense_evasion
   - attack.t1027
